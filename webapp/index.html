@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Defibrillatoren in Köln - Mobiler Defi-Finder</title>
+    <!--link href="css/bootstrap.min.css" rel="stylesheet"-->
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    html, body, #map {
+        height: 100%;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!--<script src="js/bootstrap.min.js"></script>-->
+    <script src="js/leaflet.min.js"></script>
+    <script>
+    /** Defition of global variables **/
+    // aeds object
+    var aeds = {};
+    var initialPos = [50.93696, 6.96568];
+    var map = L.map("map", {attributionControl: false}).setView(initialPos, 14);
+    //var tilesurl = "http://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png";
+    var tilesurl = "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png";
+    var tiles = L.tileLayer(tilesurl, {
+      maxZoom: 19
+    });
+
+    // layer groups
+    var aedLayerGroup = L.layerGroup().addTo(map);
+    var posLayerGroup = L.layerGroup().addTo(map);
+    var posInnerCircle;
+    var posOuterCircle;
+
+    var aedIcon = L.icon({
+        iconUrl: 'marker.png',
+        iconSize:     [40, 45],
+        iconAnchor:   [20, 46],
+        popupAnchor:  [0, -30]
+    });
+
+    /* Table of distances between user and each AED.
+       Holds arrays like [<aed ID>, <distance>]
+    */
+    var distanceTable = [];
+
+    // True when we informed the user about the closest AED
+    var userInformed = false;
+
+
+    $.getJSON("aed.min.geojson", function(data){
+        $.each(data.features, function(i, item) {
+            //console.log(item);
+            aeds[item.id] = item;
+            aed = L.marker([item.geometry.coordinates[1], item.geometry.coordinates[0]], {icon: aedIcon}).addTo(aedLayerGroup);
+            html = "<b>"+ item.properties.name +"</b>";
+            if (item.properties.location_details) {
+                html += "<div>"+ item.properties.location_details +"</div>";
+            }
+            if (item.properties.address) {
+                html += "<div>"+ item.properties.address +"</div>";
+            }
+            if (item.properties.city_subdistrict) {
+                html += "<div>"+ item.properties.city_subdistrict +"</div>";
+            } else if (item.properties.city_district) {
+                html += "<div>"+ item.properties.city_district +"</div>";
+            }
+            if (item.properties.comment) {
+                html += "<div>"+ item.properties.comment +"</div>";
+            }
+            aed.bindPopup(html);
+        });
+        //console.log(aeds);
+        tiles.addTo(map);
+
+        // User location tracking
+        if (navigator.geolocation) {
+            //navigator.geolocation.getCurrentPosition(followUserPosition, onLocationError);
+            var watchId = navigator.geolocation.watchPosition(
+                followUserPosition,
+                onLocationError,
+                {enableHighAccuracy: true, timeout: 60000, maximumAge: 10000});
+        }
+    });
+
+
+    
+
+    /**
+     * Called whenever device has new user location data
+     */
+    function followUserPosition(location){
+        console.log("User location update:", location);
+        updateDistanceTable([location.coords.longitude, location.coords.latitude]);
+        console.log("closest AED:", aeds[distanceTable[0].id]);
+
+        // Erstelle Positionsanzeige
+        if (!posInnerCircle) {
+            posInnerCircle = L.circle([location.coords.latitude, location.coords.longitude], 4, {
+                color: '#00f',
+                fillColor: '#00f',
+                fillOpacity: 0.8,
+                stroke: null,
+            });
+        } else {
+            posInnerCircle.setLatLng([location.coords.latitude, location.coords.longitude]);
+        }
+        if (!posOuterCircle) {
+            posOuterCircle = L.circle([location.coords.latitude, location.coords.longitude], location.coords.accuracy, {
+                color: '#00f',
+                fillColor: '#00f',
+                fillOpacity: 0.1
+            });
+        } else {
+            posOuterCircle.setLatLng([location.coords.latitude, location.coords.longitude]);
+            posOuterCircle.setRadius(location.coords.accuracy);
+        }
+
+        /**
+         * Decide wether user is close enough to an AED and inform user.
+         * Only do this if position accuracy is good enough, and only once.
+         */
+        if (location.coords.accuracy < 50) {
+            // show user position indicator
+            if (!posLayerGroup.hasLayer(posInnerCircle)) {
+                posInnerCircle.addTo(posLayerGroup);
+                posOuterCircle.addTo(posLayerGroup);
+            }
+            // show alert on closest AED (if not already done so)
+            if (userInformed === false) {
+                var closest = distanceTable[0];
+                if (closest.distance < 1.0) {
+                    // good candidate: less than 1 kilometer
+                    map.setView([location.coords.latitude, location.coords.longitude], 16);
+                    alert("Nächster AED: " + aeds[closest.id].properties.name + ", " + aeds[closest.id].properties.address + ", Entfernung: " + Math.round(closest.distance * 1000.0) + " m");
+                } else {
+                    // no good candidate
+                    alert("Der nächste AED in Köln ist " + closest.distance.toFixed(1).toString().replace(".", ",") + " km entfernt.");
+                }
+                userInformed = true;
+            }
+        } else {
+            // hide user position indicator
+            posLayerGroup.clearLayers();
+        }
+    }
+
+    /**
+     * Handle geolocation error (abort etc.)
+     */
+    function onLocationError(){
+      // TODO: Show info to user?
+      console.debug("User location Error");
+    }
+
+    if (typeof Number.prototype.toRad == 'undefined') {
+        Number.prototype.toRad = function() {
+            return this * Math.PI / 180.0;
+        }
+    }
+
+    /**
+     * Distance between two [lon, lat] tuples
+     */
+    function distance(pos1, pos2) {
+        var R = 6371; // km
+        var lon1 = pos1[0];
+        var lon2 = pos2[0];
+        var lat1 = pos1[1];
+        var lat2 = pos2[1];
+        var x1 = lat2 - lat1;
+        var dLat = x1.toRad();  
+        var x2 = lon2 - lon1;
+        var dLon = x2.toRad();  
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                        Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
+                        Math.sin(dLon/2) * Math.sin(dLon/2);  
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c;
+        return d;
+    }
+
+    /**
+     * Update the distanceTable with distance
+     * to each AED
+     */
+    function updateDistanceTable(userPosition) {
+        console.log("updateDistanceTable(): userPosition=", userPosition);
+        distanceTable = [];
+        $.each(aeds, function(id, aed) {
+            dist = distance(aed.geometry.coordinates, userPosition);
+            //console.log("Distance between user and AED " + id + ":", dist);
+            distanceTable.push({id: id, distance: dist});
+        });
+        distanceTable.sort(function(a, b) {
+            return a.distance - b.distance;
+        });
+        //console.log(distanceTable);
+    }
+
+    </script>
+  </body>
+</html>

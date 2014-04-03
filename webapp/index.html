@@ -68,6 +68,7 @@
     var userInformed = false;
 
 
+    // load AED location data
     $.getJSON("aed.min.geojson", function(data){
         $.each(data.features, function(i, item) {
             //console.log(item);
@@ -155,6 +156,11 @@
                     alert("Nächster AED: " + aeds[closest.id].properties.name + ", " + aeds[closest.id].properties.address + ", Entfernung: " + Math.round(closest.distance * 1000.0) + " m");
                 } else {
                     // no good candidate
+                    // Set map view to show both nearest AED and user location
+                    var userMarker = L.marker([location.coords.latitude, location.coords.longitude]);
+                    var closestMarker = L.marker([aeds[closest.id].geometry.coordinates[1], aeds[closest.id].geometry.coordinates[0]]);
+                    var group = L.featureGroup([userMarker, closestMarker]);
+                    map.fitBounds(group.getBounds());
                     alert("Der nächste AED in Köln ist " + closest.distance.toFixed(1).toString().replace(".", ",") + " km entfernt.");
                 }
                 userInformed = true;

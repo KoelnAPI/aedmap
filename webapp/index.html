@@ -41,10 +41,13 @@
     var initialPos = [50.93696, 6.96568];
     var map = L.map("map", {attributionControl: false}).setView(initialPos, 14);
     //var tilesurl = "http://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png";
-    var tilesurl = "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png";
+    var tilesurl = "http://{s}.map.mycdn.de/aedcgn/v1/{z}/{x}/{y}.png";
     var tiles = L.tileLayer(tilesurl, {
-      maxZoom: 19
+        minZoom: 8,
+        maxZoom: 18
     });
+    // bounds of our background tiles
+    map.setMaxBounds(L.latLngBounds(L.latLng(50.78711, 6.75530), L.latLng(51.09506, 7.20188)))
 
     // layer groups
     var aedLayerGroup = L.layerGroup().addTo(map);

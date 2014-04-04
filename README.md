@@ -66,3 +66,7 @@ MIT licensed. See file LICENSE.
 ## Data
 
 The AED location data is maintained in a different repository. See https://github.com/KoelnAPI/data/tree/master/data/health/aed .
+
+## CHANGELOG
+
+* April 4, 2014: Changed map background to custom, pre-rendered tiles. See [issue #3](https://github.com/KoelnAPI/aedmap/issues/3) for details.

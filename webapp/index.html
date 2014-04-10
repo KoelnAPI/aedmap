@@ -78,6 +78,12 @@
     // Routes to certain AEDs, keyed by ID
     var aed_routes = {};
 
+    var routeStyle = {
+        "color": "#b21eef",
+        "weight": 5,
+        "opacity": 0.8
+    };
+
 
     // load AED location data
     $.getJSON("aed.min.geojson", function(data){
@@ -253,7 +259,9 @@
                         reorderDistanceTable(routes);
                         // draw shortest path
                         routeLayerGroup.clearLayers();
-                        L.geoJson(aed_routes[distanceTable[0].id].data).addTo(routeLayerGroup);
+                        L.geoJson(aed_routes[distanceTable[0].id].data, {
+                            style: routeStyle
+                        }).addTo(routeLayerGroup);
                     }
                 });
         });

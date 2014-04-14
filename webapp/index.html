@@ -109,8 +109,6 @@
                 {enableHighAccuracy: true, timeout: 60000, maximumAge: 10000});
         }
     });
-
-
     
 
     /**
@@ -154,19 +152,20 @@
                 posOuterCircle.addTo(posLayerGroup);
             }
             // show alert on closest AED (if not already done so)
+            console.log("userInformed:", userInformed);
             if (userInformed === false) {
                 var closest = distanceTable[0];
+                var userMarker = L.marker([location.coords.latitude, location.coords.longitude]);
+                var closestMarker = L.marker([aeds[closest.id].geometry.coordinates[1], aeds[closest.id].geometry.coordinates[0]]);
+                var group = L.featureGroup([userMarker, closestMarker]);
+                var bbox = group.getBounds();
+                map.fitBounds(bbox);
                 if (closest.distance < 1.0) {
                     // good candidate: less than 1 kilometer
-                    map.setView([location.coords.latitude, location.coords.longitude], 16);
+                    // Show closest AED and user position
                     alert("Nächster AED: " + aeds[closest.id].properties.name + ", " + aeds[closest.id].properties.address + ", Entfernung: " + Math.round(closest.distance * 1000.0) + " m");
-                } else {
+                } else {
                     // no good candidate
-                    // Set map view to show both nearest AED and user location
-                    var userMarker = L.marker([location.coords.latitude, location.coords.longitude]);
-                    var closestMarker = L.marker([aeds[closest.id].geometry.coordinates[1], aeds[closest.id].geometry.coordinates[0]]);
-                    var group = L.featureGroup([userMarker, closestMarker]);
-                    map.fitBounds(group.getBounds());
                     alert("Der nächste AED in Köln ist " + closest.distance.toFixed(1).toString().replace(".", ",") + " km entfernt.");
                 }
                 userInformed = true;

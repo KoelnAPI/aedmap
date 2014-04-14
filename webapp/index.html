@@ -55,6 +55,7 @@
     // layer groups
     var aedLayerGroup = L.layerGroup().addTo(map);
     var posLayerGroup = L.layerGroup().addTo(map);
+    var routeLayerGroup = L.layerGroup().addTo(map);
     var posInnerCircle;
     var posOuterCircle;
 
@@ -72,6 +73,16 @@
 
     // True when we informed the user about the closest AED
     var userInformed = false;
+
+
+    // Routes to certain AEDs, keyed by ID
+    var aed_routes = {};
+
+    var routeStyle = {
+        "color": "#b21eef",
+        "weight": 5,
+        "opacity": 0.8
+    };
 
 
     // load AED location data
@@ -195,6 +206,7 @@
 
     /**
      * Distance between two [lon, lat] tuples
+     * in kilometers
      */
     function distance(pos1, pos2) {
         var R = 6371; // km
@@ -229,7 +241,76 @@
         distanceTable.sort(function(a, b) {
             return a.distance - b.distance;
         });
-        //console.log(distanceTable);
+        // get route for the closest 3 AEDs
+        var routes = [];
+        // empty cached AED routes
+        aed_routes = {};
+        $.each([0, 1, 2], function(i){
+            var id = distanceTable[i].id;
+            getRoute(userPosition,
+                aeds[id].geometry.coordinates,
+                function(r){
+                    //console.log("Callback called!", r);
+                    aed_routes[id] = r;
+                    routes.push({
+                        aed_id: id,
+                        route_distance: r.distance,
+                        geometry: r.data
+                    });
+                    if (routes.length > 2) {
+                        reorderDistanceTable(routes);
+                        // draw shortest path
+                        routeLayerGroup.clearLayers();
+                        L.geoJson(aed_routes[distanceTable[0].id].data, {
+                            style: routeStyle
+                        }).addTo(routeLayerGroup);
+                    }
+                });
+        });
+    }
+
+    /**
+     * Reorder the distance table using graphhopper routes.
+     * Actually only reorder the first three.
+     */
+    function reorderDistanceTable(allroutes) {
+        var clostest_before = distanceTable[0].id;
+        var distance_before = distanceTable[0].distance;
+        allroutes.sort(function(a, b) {
+            return a.route_distance - b.route_distance;
+        });
+        console.log("reorderDistanceTable() sorted:", allroutes);
+        // overwrite items
+        for (var i=0; i<allroutes.length; i++) {
+            distanceTable[i] = {
+                id: allroutes[i].aed_id,
+                distance: allroutes[i].route_distance / 1000.0
+            };
+        }
+        console.log("closest before:", clostest_before, ", distance:", distance_before);
+        console.log("closest after:", distanceTable[0].id, ", distance:", distanceTable[0].distance);
+    }
+
+    /**
+     * Get route between point1 (lon, lat) and point2
+     * from GraphHopper
+     */
+    function getRoute(p1, p2, callback) {
+        var url = "http://graphhopper.sendung.de/api/route?type=jsonp";
+        url += "&vehicle=foot";
+        url += "&encodedPolyline=false";
+        url += "&minPathPrecision=1";
+        url += "&point=" + p1[1] + "," + p1[0];
+        url += "&point=" + p2[1] + "," + p2[0];
+        $.ajax(url, {
+            cache: true,
+            timeout: 1000,
+            crossDomain: true,
+            dataType: "jsonp",
+            success: function(data){
+                callback(data.route);
+            }
+        });
     }
 
     </script>

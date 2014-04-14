@@ -121,20 +121,23 @@
 
         // Erstelle Positionsanzeige
         if (!posInnerCircle) {
-            posInnerCircle = L.circle([location.coords.latitude, location.coords.longitude], 4, {
+            posInnerCircle = L.circle([location.coords.latitude, location.coords.longitude], 8, {
                 color: '#00f',
                 fillColor: '#00f',
                 fillOpacity: 0.8,
                 stroke: null,
+                weight: 6
             });
         } else {
             posInnerCircle.setLatLng([location.coords.latitude, location.coords.longitude]);
         }
         if (!posOuterCircle) {
-            posOuterCircle = L.circle([location.coords.latitude, location.coords.longitude], location.coords.accuracy, {
+            var radius = Math.max(location.coords.accuracy, 10);
+            posOuterCircle = L.circle([location.coords.latitude, location.coords.longitude], radius, {
                 color: '#00f',
                 fillColor: '#00f',
-                fillOpacity: 0.1
+                fillOpacity: 0.1,
+                weight: 6
             });
         } else {
             posOuterCircle.setLatLng([location.coords.latitude, location.coords.longitude]);
@@ -145,7 +148,7 @@
          * Decide wether user is close enough to an AED and inform user.
          * Only do this if position accuracy is good enough, and only once.
          */
-        if (location.coords.accuracy < 50) {
+        if (location.coords.accuracy < 100) {
             // show user position indicator
             if (!posLayerGroup.hasLayer(posInnerCircle)) {
                 posInnerCircle.addTo(posLayerGroup);

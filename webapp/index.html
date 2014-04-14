@@ -45,9 +45,10 @@
     var map = L.map("map", {attributionControl: false}).setView(initialPos, 14);
     //var tilesurl = "http://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png";
     var tilesurl = "http://{s}.map.mycdn.de/aedcgn/v1/{z}/{x}/{y}.png";
+    var tilesMaxZoom = 18;
     var tiles = L.tileLayer(tilesurl, {
         minZoom: 8,
-        maxZoom: 18
+        maxZoom: tilesMaxZoom
     });
     // bounds of our background tiles
     map.setMaxBounds(L.latLngBounds(L.latLng(50.78711, 6.75530), L.latLng(51.09506, 7.20188)));
@@ -159,7 +160,7 @@
          * Decide wether user is close enough to an AED and inform user.
          * Only do this if position accuracy is good enough, and only once.
          */
-        if (location.coords.accuracy < 100) {
+        if (location.coords.accuracy < 80) {
             // show user position indicator
             if (!posLayerGroup.hasLayer(posInnerCircle)) {
                 posInnerCircle.addTo(posLayerGroup);
@@ -173,15 +174,19 @@
                 var closestMarker = L.marker([aeds[closest.id].geometry.coordinates[1], aeds[closest.id].geometry.coordinates[0]]);
                 var group = L.featureGroup([userMarker, closestMarker]);
                 var bbox = group.getBounds();
-                map.fitBounds(bbox);
+                map.fitBounds(bbox, {maxZoom: tilesMaxZoom});
+                var alertText = "";
                 if (closest.distance < 1.0) {
                     // good candidate: less than 1 kilometer
                     // Show closest AED and user position
-                    alert("Nächster AED: " + aeds[closest.id].properties.name + ", " + aeds[closest.id].properties.address + ", Entfernung: " + Math.round(closest.distance * 1000.0) + " m");
+                    alertText = "Nächster AED: " + aeds[closest.id].properties.name + ", " + aeds[closest.id].properties.address + ", Entfernung: " + Math.round(closest.distance * 1000.0) + " m";
                 } else {
                     // no good candidate
-                    alert("Der nächste AED in Köln ist " + closest.distance.toFixed(1).toString().replace(".", ",") + " km entfernt.");
+                    alertText = "Der nächste AED in Köln ist " + closest.distance.toFixed(1).toString().replace(".", ",") + " km entfernt."
                 }
+                var timeout = window.setTimeout(function(){
+                    alert(alertText);
+                }, 600);
                 userInformed = true;
             }
         } else {

@@ -18,7 +18,7 @@ Current version in development can be testet here: http://www.sendung.de/aedcgn/
 
 * Optimized for use with a smartphone
 * Fast loading, even with sub-optimal network bandwidth
-* Simplicity, optimized for the emergency case (see below)
+* Simplicity, tailored for very specific use cases (see below)
 
 ## Intended use cases
 

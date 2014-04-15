@@ -252,31 +252,36 @@
         aed_routes = {};
         $.each([0, 1, 2], function(i){
             var id = distanceTable[i].id;
-            getRoute(userPosition,
-                aeds[id].geometry.coordinates,
-                function(r){
-                    //console.log("Callback called!", r);
-                    aed_routes[id] = r;
-                    routes.push({
-                        aed_id: id,
-                        route_distance: r.distance,
-                        geometry: r.data
-                    });
-                    if (routes.length > 2) {
-                        reorderDistanceTable(routes);
-                        // draw shortest path
-                        routeLayerGroup.clearLayers();
-                        L.geoJson(aed_routes[distanceTable[0].id].data, {
-                            style: routeStyle
-                        }).addTo(routeLayerGroup);
+            // only do this if direct distance is < 5 km
+            if (distanceTable[i].distance < 5) {
+                getRoute(userPosition,
+                    aeds[id].geometry.coordinates,
+                    function(r){
+                        //console.log("Callback called!", r);
+                        aed_routes[id] = r;
+                        routes.push({
+                            aed_id: id,
+                            route_distance: r.distance,
+                            geometry: r.data
+                        });
+                        if (routes.length > 2) {
+                            reorderDistanceTable(routes);
+                            // draw shortest path
+                            routeLayerGroup.clearLayers();
+                            L.geoJson(aed_routes[distanceTable[0].id].data, {
+                                style: routeStyle
+                            }).addTo(routeLayerGroup);
+                        }
                     }
-                });
+                );
+            }
         });
     }
 
     /**
      * Reorder the distance table using graphhopper routes.
      * Actually only reorder the first three.
+     * And only do this if not too far away.
      */
     function reorderDistanceTable(allroutes) {
         var clostest_before = distanceTable[0].id;

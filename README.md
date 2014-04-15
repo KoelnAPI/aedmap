@@ -9,6 +9,11 @@ and improvements have to be made until this should be released to a broader audi
 
 Current version in development can be testet here: http://www.sendung.de/aedcgn/
 
+# Screenshots
+
+![Screenshot 1](https://github.com/KoelnAPI/aedmap/raw/master/screenshots/2014-04-15_01_alert.png)
+![Screenshot 2](https://github.com/KoelnAPI/aedmap/raw/master/screenshots/2014-04-15_02_routing.png)
+
 # Design principles
 
 * Optimized for use with a smartphone

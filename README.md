@@ -9,22 +9,22 @@ and improvements have to be made until this should be released to a broader audi
 
 Current version in development can be testet here: http://www.sendung.de/aedcgn/
 
-# Screenshots
+## Screenshots
 
 ![Screenshot 1](https://github.com/KoelnAPI/aedmap/raw/master/screenshots/2014-04-15_01_alert.png)
 ![Screenshot 2](https://github.com/KoelnAPI/aedmap/raw/master/screenshots/2014-04-15_02_routing.png)
 
-# Design principles
+## Design principles
 
 * Optimized for use with a smartphone
 * Fast loading, even with sub-optimal network bandwidth
 * Simplicity, optimized for the emergency case (see below)
 
-# Intended use cases
+## Intended use cases
 
 This application is built to enable the following szenarios:
 
-## Detection of nearest AED
+### Detection of nearest AED
 
 *As a user, I want to quickly find the location of the nearest AED.*
 
@@ -43,7 +43,7 @@ find out which candidate would be fastest. For example, the application could pr
 several locations via GraphHopper (pedestrian routing) and find out which can be reached
 fastest.
 
-## Browsing the environment
+### Browsing the environment
 
 *As a user, I want to inform myself of AED locations nearby.*
 
@@ -51,7 +51,7 @@ In contrast to the emergency use case, this szenario should encourage the explor
 the environment. A user could browse her day to day environment like a place of work in order
 find out where to get an AED in an emergency situation.
 
-## Location checking
+### Location checking
 
 *As a data maintainer, I want to make sure that AED locations are correct.*
 

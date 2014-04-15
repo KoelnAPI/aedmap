@@ -69,4 +69,6 @@ The AED location data is maintained in a different repository. See https://githu
 
 ## CHANGELOG
 
+* April 14, 2014: Added *routing*. See [issue #7](https://github.com/KoelnAPI/aedmap/issues/7) for details.
 * April 4, 2014: Changed map background to custom, pre-rendered tiles. See [issue #3](https://github.com/KoelnAPI/aedmap/issues/3) for details.
+

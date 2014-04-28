@@ -30,10 +30,55 @@
     html, body, #map {
         height: 100%;
     }
+    .container{
+        position: relative;
+        width: 300px;
+        height: 300px;
+        background-color: red;
+        margin:auto;
+    }
+    .overlay{
+        position: absolute;
+        width: 300px;
+        height: 200px;
+        background-color: white;
+        left: 50%;
+        top: 50%;
+        margin-left: -30%;
+        margin-top: -10%;
+        z-index: 100;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+        border: 2px solid #009900;
+    }
+    .overlay div { 
+        text-align: center;
+        padding-top: 12px;
+    }
+    .overlay p { margin: 12px; }
+    .informed-button {
+        background-color: white;
+        -moz-border-radius: 15px;
+        -webkit-border-radius: 15px;
+        border-radius: 15px;
+        border: 2px solid #009900;
+        padding: 10px;
+        margin-top: 7px;
+        margin-left: 100px;
+        padding-bottom: 13px;
+        cursor:  pointer;
+    }
     </style>
   </head>
   <body>
     <div id="map"></div>
+    <div id="overlay" class="overlay">
+        <div><strong>Über diese Anwendung</strong></div>
+        <p>Diese App hilft Ihnen dabei, öffentlich zugänglich Defibrillatoren (AEDs) in Köln zu finden.</p>
+        <p>Mit einem AED konnen Sie im Fall eines plötzlichen Herzstillstandes Erste Hilfe leisten.</p>
+        <button id="informed" class="informed-button"><strong>Zur Anwendung</strong></button>
+    </div>
     <script src="https://code.jquery.com/jquery.js"></script>
     <!--<script src="js/bootstrap.min.js"></script>-->
     <script src="js/leaflet.min.js"></script>
@@ -75,6 +120,13 @@
     // True when we informed the user about the closest AED
     var userInformed = false;
 
+    // informed user knows this projekt
+    $("#informed").on("click", function () {
+      localStorage.setItem("informed", true);
+      $("#overlay").hide();
+    })
+
+    if (localStorage.getItem("informed")) { $("#overlay").hide(); }
 
     // Routes to certain AEDs, keyed by ID
     var aed_routes = {};

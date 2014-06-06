@@ -170,7 +170,12 @@
             var watchId = navigator.geolocation.watchPosition(
                 followUserPosition,
                 onLocationError,
-                {enableHighAccuracy: true, timeout: 60000, maximumAge: 10000});
+                {
+                    enableHighAccuracy: true,
+                    timeout: 60000,
+                    maximumAge: 10000
+                }
+            );
         }
     });
     
@@ -366,7 +371,7 @@
         url += "&point=" + p2[1] + "," + p2[0];
         $.ajax(url, {
             cache: true,
-            timeout: 1000,
+            timeout: 2000,
             crossDomain: true,
             dataType: "jsonp",
             success: function(data){

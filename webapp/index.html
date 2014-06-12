@@ -121,12 +121,12 @@
     var userInformed = false;
 
     // informed user knows this projekt
-    $("#informed").on("click", function () {
-      localStorage.setItem("informed", true);
-      $("#overlay").hide();
-    })
-
-    if (localStorage.getItem("informed")) { $("#overlay").hide(); }
+    //$("#informed").on("click", function () {
+    //  localStorage.setItem("informed", true);
+    //  $("#overlay").hide();
+    //})
+    //if (localStorage.getItem("informed")) { $("#overlay").hide(); }
+    $("#overlay").hide();
 
     // Routes to certain AEDs, keyed by ID
     var aed_routes = {};

@@ -184,9 +184,9 @@
      * Called whenever device has new user location data
      */
     function followUserPosition(location){
-        console.log("User location update:", location);
+        //console.log("User location update:", location);
         updateDistanceTable([location.coords.longitude, location.coords.latitude]);
-        console.log("closest AED:", aeds[distanceTable[0].id]);
+        //console.log("closest AED:", aeds[distanceTable[0].id]);
 
         // Erstelle Positionsanzeige
         if (!posInnerCircle) {
@@ -224,7 +224,7 @@
                 posOuterCircle.addTo(posLayerGroup);
             }
             // show alert on closest AED (if not already done so)
-            console.log("userInformed:", userInformed);
+            //console.log("userInformed:", userInformed);
             if (userInformed === false) {
                 var closest = distanceTable[0];
                 var userMarker = L.marker([location.coords.latitude, location.coords.longitude]);
@@ -257,7 +257,7 @@
      */
     function onLocationError(){
       // TODO: Show info to user?
-      console.debug("User location Error");
+      //console.debug("User location Error");
     }
 
     if (typeof Number.prototype.toRad == 'undefined') {
@@ -293,7 +293,7 @@
      * to each AED
      */
     function updateDistanceTable(userPosition) {
-        console.log("updateDistanceTable(): userPosition=", userPosition);
+        //console.log("updateDistanceTable(): userPosition=", userPosition);
         distanceTable = [];
         $.each(aeds, function(id, aed) {
             dist = distance(aed.geometry.coordinates, userPosition);
@@ -319,13 +319,13 @@
                         routes.push({
                             aed_id: id,
                             route_distance: r.distance,
-                            geometry: r.data
+                            geometry: r.points
                         });
                         if (routes.length > 2) {
                             reorderDistanceTable(routes);
                             // draw shortest path
                             routeLayerGroup.clearLayers();
-                            L.geoJson(aed_routes[distanceTable[0].id].data, {
+                            L.geoJson(aed_routes[distanceTable[0].id].points, {
                                 style: routeStyle
                             }).addTo(routeLayerGroup);
                         }
@@ -346,7 +346,7 @@
         allroutes.sort(function(a, b) {
             return a.route_distance - b.route_distance;
         });
-        console.log("reorderDistanceTable() sorted:", allroutes);
+        //console.log("reorderDistanceTable() sorted:", allroutes);
         // overwrite items
         for (var i=0; i<allroutes.length; i++) {
             distanceTable[i] = {
@@ -354,8 +354,8 @@
                 distance: allroutes[i].route_distance / 1000.0
             };
         }
-        console.log("closest before:", clostest_before, ", distance:", distance_before);
-        console.log("closest after:", distanceTable[0].id, ", distance:", distanceTable[0].distance);
+        //console.log("closest before:", clostest_before, ", distance:", distance_before);
+        //console.log("closest after:", distanceTable[0].id, ", distance:", distanceTable[0].distance);
     }
 
     /**
@@ -363,9 +363,10 @@
      * from GraphHopper
      */
     function getRoute(p1, p2, callback) {
-        var url = "http://graphhopper.sendung.de/api/route?type=jsonp";
+        var url = "http://graphhopper.sendung.de/route?type=jsonp";
         url += "&vehicle=foot";
-        url += "&encodedPolyline=false";
+        url += "&points_encoded=0";
+        url += "&instructions=0";
         url += "&minPathPrecision=1";
         url += "&point=" + p1[1] + "," + p1[0];
         url += "&point=" + p2[1] + "," + p2[0];
@@ -375,7 +376,8 @@
             crossDomain: true,
             dataType: "jsonp",
             success: function(data){
-                callback(data.route);
+                //console.log(data);
+                callback(data.paths[0]);
             }
         });
     }

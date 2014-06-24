@@ -231,7 +231,8 @@ break}};e.documentElement.addEventListener(this.POINTER_UP,l,!1),e.documentEleme
     var tilesMaxZoom = 18;
     var tiles = L.tileLayer(tilesurl, {
         minZoom: 8,
-        maxZoom: tilesMaxZoom
+        maxZoom: tilesMaxZoom,
+        subdomains: 'a'
     });
     // bounds of our background tiles
     map.setMaxBounds(L.latLngBounds(L.latLng(50.78711, 6.75530), L.latLng(51.09506, 7.20188)));

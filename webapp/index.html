@@ -261,6 +261,9 @@ break}};e.documentElement.addEventListener(this.POINTER_UP,l,!1),e.documentEleme
         "opacity": 0.8
     };
 
+    // preload marker
+    var markerImage = new Image();
+    markerImage.src = "marker.png";
 
     // load AED location data
     $.getJSON("aed.min.geojson", function(data){
